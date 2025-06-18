@@ -56,7 +56,7 @@ export default function Header() {
         id="main-header"
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          isScrolled ? "bg-card/80 backdrop-blur-lg border-b border-border shadow-md h-16" : "bg-transparent h-[72px]",
+          isScrolled ? "bg-card/95 backdrop-blur-lg border-b border-border shadow-md h-16" : "bg-transparent h-[72px]",
         )}
       >
         <div
