@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,11 +24,21 @@ export default function LoginClient() {
   const [errors, setErrors] = useState<{ email?: string; password?: string; general?: string }>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [redirectTo, setRedirectTo] = useState("/")
 
   const { login, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirect") || "/"
+
+  // Get redirect parameter from URL on client side only
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const redirect = urlParams.get('redirect')
+      if (redirect) {
+        setRedirectTo(redirect)
+      }
+    }
+  }, [])
 
   // Redirect if already authenticated
   useEffect(() => {
