@@ -31,7 +31,6 @@ const navLinks = [
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
   const { bonusPoints } = useBonusPoints()
   const { user } = useAuth()
@@ -44,98 +43,12 @@ export default function Header() {
   }
 
   useEffect(() => {
-    setMounted(true)
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20)
     }
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
-
-  // Don't render tooltips until mounted to prevent hydration mismatch
-  if (!mounted) {
-    return (
-      <header
-        id="main-header"
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-          isScrolled ? "bg-card/80 backdrop-blur-lg border-b border-border shadow-md h-16" : "bg-transparent h-[72px]",
-        )}
-      >
-        <div
-          className={cn(
-            "container mx-auto flex items-center justify-between gap-6 px-4 md:px-6",
-            isScrolled ? "h-16" : "h-[72px]",
-          )}
-        >
-          <Link href="/" className="flex items-center gap-2">
-            <Rocket className="h-7 w-7 md:h-8 md:w-8 text-primary" />
-            <span className="text-xl md:text-2xl font-bold font-heading">CreatorHub</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((item) => {
-              let href = item.href
-              if (item.label === "Ganhos" && !user) {
-                href = "/login?redirect=/calculadora"
-              }
-              return (
-                <Link
-                  key={item.href}
-                  href={href}
-                  className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-                >
-                  {item.label}
-                </Link>
-              )
-            })}
-          </nav>
-          <div className="flex items-center gap-2 md:gap-4">
-            {user ? (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/carteira"
-                  className="flex items-center gap-1.5 text-xs font-medium text-primary rounded-full px-2 py-1 border border-primary/30 hover:bg-primary/10 transition-colors md:px-3 md:py-1.5"
-                >
-                  <Wallet className="h-4 w-4" />
-                  <span className="hidden sm:inline">Saldo:</span>
-                  <span className="font-bold text-foreground">{formatCurrency(user.balance?.real ?? 0)}</span>
-                </Link>
-
-                <Link
-                  href="/carteira"
-                  className="hidden md:flex items-center gap-1.5 text-xs font-medium text-amber-500 rounded-full px-3 py-1.5 border border-amber-500/30 hover:bg-amber-500/10 transition-colors"
-                >
-                  <Gift className="h-4 w-4" />
-                  <span className="hidden sm:inline">Bônus:</span>
-                  <span className="font-bold text-foreground">{bonusPoints} Pts</span>
-                </Link>
-              </div>
-            ) : (
-              <div className="hidden sm:flex">
-                <Button asChild variant="ghost" size="icon">
-                  <Link href="/login?redirect=/carteira">
-                    <Wallet className="h-5 w-5" />
-                    <span className="sr-only">Ver Saldo</span>
-                  </Link>
-                </Button>
-              </div>
-            )}
-            <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-              {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              <span className="sr-only">Toggle theme</span>
-            </Button>
-            <AuthButtons />
-            <div className="md:hidden">
-              <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
-    )
-  }
 
   return (
     <>
@@ -279,13 +192,8 @@ export default function Header() {
 
 function AuthButtons() {
   const { user, logout, isLoading } = useAuth()
-  const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (isLoading || !mounted) {
+  if (isLoading) {
     return <div className="w-8 h-8 animate-pulse bg-muted rounded-full" />
   }
 
@@ -341,27 +249,25 @@ function AuthButtons() {
         </Button>
       </div>
       <div className="md:hidden">
-        {mounted && (
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button asChild variant="ghost" size="icon">
-                  <Link href="/login">
-                    <LogIn className="h-5 w-5" />
-                    <span className="sr-only">Entrar</span>
-                  </Link>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="bottom"
-                align="center"
-                className="bg-card text-card-foreground border-border shadow-lg"
-              >
-                <p>Entrar ou Criar Conta</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button asChild variant="ghost" size="icon">
+                <Link href="/login">
+                  <LogIn className="h-5 w-5" />
+                  <span className="sr-only">Entrar</span>
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent
+              side="bottom"
+              align="center"
+              className="bg-card text-card-foreground border-border shadow-lg"
+            >
+              <p>Entrar ou Criar Conta</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </>
   )
